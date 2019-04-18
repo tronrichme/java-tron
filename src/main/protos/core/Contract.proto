@@ -100,7 +100,7 @@ message DeferredTransactionContract {
   int64 delaySecond = 1;
   google.protobuf.Any parameter = 2;
   int32 type = 3;
-}f
+}
 
 message WitnessCreateContract {
   bytes owner_address = 1;
