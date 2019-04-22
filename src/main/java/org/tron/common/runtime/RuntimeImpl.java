@@ -44,6 +44,7 @@ import org.tron.core.Wallet;
 import org.tron.core.actuator.Actuator;
 import org.tron.core.actuator.ActuatorFactory;
 import org.tron.core.capsule.*;
+import org.tron.core.capsule.utils.TransactionUtil;
 import org.tron.core.config.args.Args;
 import org.tron.core.db.EnergyProcessor;
 import org.tron.core.db.TransactionTrace;
@@ -165,7 +166,7 @@ public class RuntimeImpl implements Runtime {
         .createActuator(trxCap, deposit.getDbManager());
 
     for (Actuator act : actuatorList) {
-      if (trace.getDeferredStage() == Constant.UNEXECUTEDDEFERREDTRANSACTION){
+      if (trace.getDeferredStage() == Constant.UNEXECUTEDDEFERREDTRANSACTION) {
         act.validateDeferredTransaction(trx.getRawData().getDeferredStage().getDelaySeconds());
         trace.chargeDeferredFee(trxCap.getDeferredSeconds(), result.getRet());
       }
@@ -392,6 +393,12 @@ public class RuntimeImpl implements Runtime {
               .encode58Check(contractAddress));
     }
 
+    if (trace.getDeferredStage() == Constant.UNEXECUTEDDEFERREDTRANSACTION) {
+      TransactionUtil.validateDeferredTransaction(new TransactionCapsule(trx));
+      trace.chargeDeferredFee(trx.getRawData().getDeferredStage().getDelaySeconds(), result.getRet());
+      return;
+    }
+
     newSmartContract = newSmartContract.toBuilder()
         .setContractAddress(ByteString.copyFrom(contractAddress)).build();
     long callValue = newSmartContract.getCallValue();
@@ -533,6 +540,12 @@ public class RuntimeImpl implements Runtime {
 
     byte[] callerAddress = contract.getOwnerAddress().toByteArray();
     checkTokenValueAndId(tokenValue, tokenId);
+
+    if (trace.getDeferredStage() == Constant.UNEXECUTEDDEFERREDTRANSACTION) {
+      TransactionUtil.validateDeferredTransaction(new TransactionCapsule(trx));
+      trace.chargeDeferredFee(trx.getRawData().getDeferredStage().getDelaySeconds(), result.getRet());
+      return;
+    }
 
     byte[] code = this.deposit.getCode(contractAddress);
     if (isNotEmpty(code)) {
