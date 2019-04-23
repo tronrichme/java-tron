@@ -1260,7 +1260,11 @@ public class Manager {
     if (Objects.isNull(deferredTransactionCapsule.getInstance())) {
       throw new DeferredTransactionException("not transaction found");
     }
-    return new TransactionCapsule(deferredTransactionCapsule.getInstance().getTransaction());
+    if (transactionCapsule.getInstance().equals(deferredTransactionCapsule.getInstance().getTransaction()) == false) {
+      throw new DeferredTransactionException("transaction is  modified");
+    }
+
+    return transactionCapsule;
   }
 
   void validateDeferredTransactionType(TransactionCapsule trxCap) throws ContractValidateException{
