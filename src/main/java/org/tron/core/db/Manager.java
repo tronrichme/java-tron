@@ -1245,7 +1245,8 @@ public class Manager {
   TransactionCapsule getExecutingDeferredTransaction(TransactionCapsule transactionCapsule,
       BlockCapsule blockCap)
       throws DeferredTransactionException {
-    if (Objects.isNull(blockCap)) {
+    if (Objects.isNull(blockCap) || Objects.isNull(transactionCapsule)
+        || Objects.isNull(transactionCapsule.getInstance())) {
       throw new DeferredTransactionException("block capsule can't be null");
     }
     DeferredTransactionCapsule deferredTransactionCapsule =
@@ -1260,8 +1261,8 @@ public class Manager {
     if (Objects.isNull(deferredTransactionCapsule.getInstance())) {
       throw new DeferredTransactionException("not transaction found");
     }
-    if (transactionCapsule.getInstance().equals(deferredTransactionCapsule.getInstance().getTransaction()) == false) {
-      throw new DeferredTransactionException("transaction is  modified");
+    if (transactionCapsule.getInstance().getRawData().equals(transactionCapsule.getInstance().getRawData()) == false) {
+      throw new DeferredTransactionException("transaction is modified");
     }
 
     return transactionCapsule;
