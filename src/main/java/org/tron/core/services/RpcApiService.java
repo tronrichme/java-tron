@@ -1578,23 +1578,32 @@ public class RpcApiService implements Service {
     public void triggerContract(Contract.TriggerSmartContract request,
         StreamObserver<TransactionExtention> responseObserver) {
 
-      callContract(request, responseObserver, false);
+      callContract(request, responseObserver, false, ContractType.TriggerSmartContract, 0);
+    }
+
+    public void triggerDeferredContract(org.tron.api.GrpcAPI.DeferredTriggerContractMessage request,
+        io.grpc.stub.StreamObserver<org.tron.api.GrpcAPI.TransactionExtention> responseObserver) {
+      callContract(request.getSmartContract(), responseObserver, false, ContractType.TriggerSmartContract, request.getDelaySecond());
     }
 
     @Override
     public void triggerConstantContract(Contract.TriggerSmartContract request,
         StreamObserver<TransactionExtention> responseObserver) {
-
-      callContract(request, responseObserver, true);
+      callContract(request, responseObserver, true, ContractType.TriggerSmartContract, 0);
     }
 
     private void callContract(Contract.TriggerSmartContract request,
-        StreamObserver<TransactionExtention> responseObserver, boolean isConstant) {
+        StreamObserver<TransactionExtention> responseObserver, boolean isConstant, ContractType type, long delaySecond) {
       TransactionExtention.Builder trxExtBuilder = TransactionExtention.newBuilder();
       Return.Builder retBuilder = Return.newBuilder();
       try {
-        TransactionCapsule trxCap = createTransactionCapsule(request,
-            ContractType.TriggerSmartContract);
+        TransactionCapsule trxCap;
+        if (delaySecond > 0) {
+          trxCap = wallet.createDeferredTransactionCapsule(request, delaySecond, ContractType.TriggerSmartContract);
+        } else {
+          trxCap  = createTransactionCapsule(request, type);
+        }
+
         Transaction trx;
         if (isConstant) {
           trx = wallet.triggerConstantContract(request, trxCap, trxExtBuilder, retBuilder);

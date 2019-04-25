@@ -435,6 +435,9 @@ service Wallet {
 
   rpc TriggerConstantContract (TriggerSmartContract) returns (TransactionExtention) {
   }
+
+  rpc TriggerDeferredContract(DeferredTriggerContractMessagepcApiService.java) returns (TransactionExtention) {
+  }
   
   rpc ClearContractABI (ClearABIContract) returns (TransactionExtention) {
   }
@@ -1066,6 +1069,11 @@ message DeferredTransactionMessage {
   int64 delaySecond = 1;
   google.protobuf.Any parameter = 2;
   int32 type = 3;
+}
+
+message DeferredTriggerContractMessage {
+  int64 delaySecond = 1;
+  TriggerSmartContract smartContract = 2;
 }
 
 message TransactionListExtention {
