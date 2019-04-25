@@ -51,16 +51,13 @@ import org.springframework.stereotype.Component;
 import org.tron.common.logsfilter.EventPluginLoader;
 import org.tron.common.logsfilter.FilterQuery;
 import org.tron.common.logsfilter.capsule.BlockLogTriggerCapsule;
-import org.tron.common.logsfilter.capsule.ContractEventTriggerCapsule;
-import org.tron.common.logsfilter.capsule.ContractLogTriggerCapsule;
+import org.tron.common.logsfilter.capsule.ContractTriggerCapsule;
 import org.tron.common.logsfilter.capsule.TransactionLogTriggerCapsule;
 import org.tron.common.logsfilter.capsule.TriggerCapsule;
-import org.tron.common.logsfilter.trigger.ContractLogTrigger;
 import org.tron.common.logsfilter.trigger.ContractTrigger;
 import org.tron.common.overlay.discover.node.Node;
 import org.tron.common.overlay.message.Message;
 import org.tron.common.runtime.config.VMConfig;
-import org.tron.common.runtime.vm.LogEventWrapper;
 import org.tron.common.utils.ByteArray;
 import org.tron.common.utils.ForkController;
 import org.tron.common.utils.SessionOptional;
@@ -1261,9 +1258,6 @@ public class Manager {
     if (Objects.isNull(deferredTransactionCapsule.getInstance())) {
       throw new DeferredTransactionException("not transaction found");
     }
-    if (transactionCapsule.getInstance().getRawData().equals(transactionCapsule.getInstance().getRawData()) == false) {
-      throw new DeferredTransactionException("transaction is modified");
-    }
 
     return transactionCapsule;
   }
@@ -1320,7 +1314,10 @@ public class Manager {
     if (trxCap.getDeferredSeconds() > 0
         && trxCap.getDeferredStage() == Constant.EXECUTINGDEFERREDTRANSACTION) {
       trxCap = getExecutingDeferredTransaction(trxCap, blockCap);
-    }else if (!trxCap.validateSignature(this)) {
+      if (!validateDeferredTransaction(trxCap, this)) {
+        throw new ValidateSignatureException("trans sig validate failed");
+      }
+    } else if (!trxCap.validateSignature(this)) {
       throw new ValidateSignatureException("trans sig validate failed");
     }
 
@@ -2110,27 +2107,13 @@ public class Manager {
   private void postContractTrigger(final TransactionTrace trace, boolean remove) {
     if (eventPluginLoaded &&
         (EventPluginLoader.getInstance().isContractEventTriggerEnable()
-            || EventPluginLoader.getInstance().isContractLogTriggerEnable()
-            && trace.getRuntimeResult().getTriggerList().size() > 0)) {
-      boolean result = false;
+            || EventPluginLoader.getInstance().isContractLogTriggerEnable())) {
       // be careful, trace.getRuntimeResult().getTriggerList() should never return null
       for (ContractTrigger trigger : trace.getRuntimeResult().getTriggerList()) {
-        if (trigger instanceof LogEventWrapper && EventPluginLoader.getInstance()
-            .isContractEventTriggerEnable()) {
-          ContractEventTriggerCapsule contractEventTriggerCapsule = new ContractEventTriggerCapsule(
-              (LogEventWrapper) trigger);
-          contractEventTriggerCapsule.getContractEventTrigger().setRemoved(remove);
-          contractEventTriggerCapsule.setLatestSolidifiedBlockNumber(latestSolidifiedBlockNumber);
-          result = triggerCapsuleQueue.offer(contractEventTriggerCapsule);
-        } else if (trigger instanceof ContractLogTrigger && EventPluginLoader.getInstance()
-            .isContractLogTriggerEnable()) {
-          ContractLogTriggerCapsule contractLogTriggerCapsule = new ContractLogTriggerCapsule(
-              (ContractLogTrigger) trigger);
-          contractLogTriggerCapsule.getContractLogTrigger().setRemoved(remove);
-          contractLogTriggerCapsule.setLatestSolidifiedBlockNumber(latestSolidifiedBlockNumber);
-          result = triggerCapsuleQueue.offer(contractLogTriggerCapsule);
-        }
-        if (!result) {
+        ContractTriggerCapsule contractEventTriggerCapsule = new ContractTriggerCapsule(trigger);
+        contractEventTriggerCapsule.getContractTrigger().setRemoved(remove);
+        contractEventTriggerCapsule.setLatestSolidifiedBlockNumber(latestSolidifiedBlockNumber);
+        if (!triggerCapsuleQueue.offer(contractEventTriggerCapsule)) {
           logger.info("too many tigger, lost contract log trigger: {}", trigger.getTransactionId());
         }
       }
@@ -2217,6 +2200,7 @@ public class Manager {
     oldTrxCap.setDeferredStage(Constant.UNEXECUTEDDEFERREDTRANSACTION);
     return oldTrxCap.getTransactionId().getByteString();
   }
+
   public void insertWitness(byte[] keyAddress, long voteCount, int idx) {
     ByteString address = ByteString.copyFrom(keyAddress);
 
@@ -2234,5 +2218,20 @@ public class Manager {
         new WitnessCapsule(address, voteCount, "mock_witness_" + idx);
     witnessCapsule.setIsJobs(true);
     this.witnessStore.put(keyAddress, witnessCapsule);
+  }
+
+  private boolean validateDeferredTransaction(TransactionCapsule transactionCapsule, Manager manager)
+      throws ValidateSignatureException {
+    transactionCapsule.setDeferredStage(Constant.UNEXECUTEDDEFERREDTRANSACTION);
+    boolean result;
+    try {
+      result = transactionCapsule.validateSignature(manager);
+    }catch (ValidateSignatureException exception){
+      logger.error("unknown exception happened in validate deferred transaction", exception);
+      throw exception;
+    } finally {
+      transactionCapsule.setDeferredStage(Constant.EXECUTINGDEFERREDTRANSACTION);
+    }
+    return result;
   }
 }

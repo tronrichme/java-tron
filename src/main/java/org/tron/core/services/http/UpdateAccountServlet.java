@@ -18,6 +18,7 @@ import org.tron.protos.Protocol.Transaction.Contract.ContractType;
 
 import static org.tron.core.services.http.Util.getVisible;
 import static org.tron.core.services.http.Util.getVisiblePost;
+import static org.tron.core.services.http.Util.setTransactionPermissionId;
 
 
 @Component
@@ -54,8 +55,8 @@ public class UpdateAccountServlet extends HttpServlet {
             .createTransactionCapsule(build.build(), ContractType.AccountUpdateContract)
             .getInstance();
       }
-
-      response.getWriter().println(Util.printTransaction(tx, visible));
+      tx = setTransactionPermissionId(jsonObject, tx);
+      response.getWriter().println(Util.printCreateTransaction(tx, visible));
     } catch (Exception e) {
       logger.debug("Exception: {}", e.getMessage());
       try {
