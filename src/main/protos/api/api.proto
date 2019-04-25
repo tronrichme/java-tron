@@ -436,7 +436,7 @@ service Wallet {
   rpc TriggerConstantContract (TriggerSmartContract) returns (TransactionExtention) {
   }
 
-  rpc TriggerDeferredContract(DeferredTriggerContractMessagepcApiService.java) returns (TransactionExtention) {
+  rpc TriggerDeferredContract(DeferredTriggerContractMessage) returns (TransactionExtention) {
   }
   
   rpc ClearContractABI (ClearABIContract) returns (TransactionExtention) {
