@@ -112,7 +112,10 @@ public class RevokingDBWithCachingNewValue implements IRevokingDB {
   //for blockstore
   @Override
   public Set<byte[]> getlatestValues(long limit) {
-    return getlatestValues(head(), limit);
+    long start = System.currentTimeMillis();
+    Set<byte[]> ret = getlatestValues(head(), limit);
+    logger.info("getlatestValues(long limit) duration:{}", System.currentTimeMillis() - start);
+    return ret;
   }
 
   //for blockstore
@@ -142,7 +145,7 @@ public class RevokingDBWithCachingNewValue implements IRevokingDB {
         result.addAll(((RocksDB) ((SnapshotRoot) snapshot).db).getDb().getlatestValues(tmp));
       }
     }
-    logger.info("getlatestValues duration:{}", System.currentTimeMillis() - start);
+    logger.info("getlatestValues(Snapshot head, long limit) duration:{}", System.currentTimeMillis() - start);
     return result;
   }
 
