@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.stream.Collectors;
+import org.tron.protos.Protocol.Transaction.Contract.ContractType;
 
 import static org.tron.core.services.http.Util.getVisible;
 import static org.tron.core.services.http.Util.getVisiblePost;
@@ -39,9 +40,21 @@ public class SetAccountIdServlet extends HttpServlet {
             boolean visible = getVisiblePost( contract );
             Contract.SetAccountIdContract.Builder build = Contract.SetAccountIdContract.newBuilder();
             JsonFormat.merge(contract, build, visible );
-            Protocol.Transaction tx = wallet.createTransactionCapsule(build.build(),
-                            Protocol.Transaction.Contract.ContractType.SetAccountIdContract).getInstance();
+            long delaySeconds = 0;
             JSONObject jsonObject = JSONObject.parseObject(contract);
+            if (jsonObject.containsKey(Constant.DELAY_SECONDS)) {
+                delaySeconds = jsonObject.getLong(Constant.DELAY_SECONDS);
+            }
+
+            Protocol.Transaction tx;
+            if (delaySeconds > 0) {
+                tx = wallet.createDeferredTransactionCapsule(build.build(), delaySeconds, ContractType.TransferContract).getInstance();
+                tx = TransactionUtil.setTransactionDelaySeconds(tx, delaySeconds);
+            } else {
+                tx = wallet.createTransactionCapsule(build.build(),
+                    Protocol.Transaction.Contract.ContractType.SetAccountIdContract).getInstance();
+            }
+
             tx = setTransactionPermissionId(jsonObject, tx);
             response.getWriter().println(Util.printCreateTransaction(tx, visible));
         } catch (Exception e) {
