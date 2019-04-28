@@ -417,8 +417,8 @@ public class Wallet {
       }
     }
 
-    if (contractType == ContractType.CreateSmartContract ||
-        contractType == ContractType.TriggerSmartContract ) {
+    if (delaySecond > 0 && (contractType == ContractType.CreateSmartContract
+        || contractType == ContractType.TriggerSmartContract)) {
       TransactionUtil.validateDeferredTransactionFee(trx, delaySecond, dbManager);
     }
 
