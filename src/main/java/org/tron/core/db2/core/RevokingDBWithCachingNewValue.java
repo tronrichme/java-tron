@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.tron.common.utils.ByteUtil;
 import org.tron.core.config.args.Args;
 import org.tron.core.db.common.WrappedByteArray;
@@ -20,6 +21,7 @@ import org.tron.core.db2.common.RocksDB;
 import org.tron.core.db2.common.Value;
 import org.tron.core.exception.ItemNotFoundException;
 
+@Slf4j(topic = "DB")
 public class RevokingDBWithCachingNewValue implements IRevokingDB {
 
   //true:fullnode, false:soliditynode
@@ -115,6 +117,7 @@ public class RevokingDBWithCachingNewValue implements IRevokingDB {
 
   //for blockstore
   private synchronized Set<byte[]> getlatestValues(Snapshot head, long limit) {
+    long start = System.currentTimeMillis();
     if (limit <= 0) {
       return Collections.emptySet();
     }
@@ -139,7 +142,7 @@ public class RevokingDBWithCachingNewValue implements IRevokingDB {
         result.addAll(((RocksDB) ((SnapshotRoot) snapshot).db).getDb().getlatestValues(tmp));
       }
     }
-
+    logger.info("getlatestValues duration:{}", System.currentTimeMillis() - start);
     return result;
   }
 
