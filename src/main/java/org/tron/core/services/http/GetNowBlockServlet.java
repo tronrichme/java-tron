@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.tron.common.utils.Time;
 import org.tron.core.Wallet;
 import org.tron.protos.Protocol.Block;
 
@@ -19,6 +20,7 @@ public class GetNowBlockServlet extends HttpServlet {
   private Wallet wallet;
 
   protected void doGet(HttpServletRequest request, HttpServletResponse response) {
+    long start = Time.getCurrentMillis();
     try {
       Block reply = wallet.getNowBlock();
       if (reply != null) {
@@ -26,6 +28,8 @@ public class GetNowBlockServlet extends HttpServlet {
       } else {
         response.getWriter().println("{}");
       }
+
+      logger.info("GetNowBlockServlet duration: {}", Time.getCurrentMillis() - start);
     } catch (Exception e) {
       logger.debug("Exception: {}", e.getMessage());
       try {

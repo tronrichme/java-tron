@@ -44,6 +44,8 @@ public class WalletOnSolidity {
       Executors.newFixedThreadPool(Args.getInstance().getSolidityThreads(),
           new ThreadFactoryBuilder().setNameFormat("WalletOnSolidity-%d").build()));
 
+  private static final int GET_TIME_OUT = 3000;
+
   @Autowired
   private Manager dbManager;
   @Autowired
@@ -63,7 +65,7 @@ public class WalletOnSolidity {
     long start = Time.getCurrentMillis();
 
     try {
-      return future.get(1000, TimeUnit.MILLISECONDS);
+      return future.get(GET_TIME_OUT, TimeUnit.MILLISECONDS);
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
     } catch (ExecutionException ignored) {
@@ -88,7 +90,7 @@ public class WalletOnSolidity {
 
     long start = Time.getCurrentMillis();
     try {
-      future.get(1000, TimeUnit.MILLISECONDS);
+      future.get(GET_TIME_OUT, TimeUnit.MILLISECONDS);
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
     } catch (ExecutionException ignored) {
