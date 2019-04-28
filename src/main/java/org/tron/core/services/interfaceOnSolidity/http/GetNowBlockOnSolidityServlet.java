@@ -17,6 +17,7 @@ public class GetNowBlockOnSolidityServlet extends GetNowBlockServlet {
   private WalletOnSolidity walletOnSolidity;
 
   protected void doGet(HttpServletRequest request, HttpServletResponse response) {
+    logger.info("GetNowBlockOnSolidityServlet get begin {}", request);
     walletOnSolidity.futureGet(() -> super.doGet(request, response));
   }
 

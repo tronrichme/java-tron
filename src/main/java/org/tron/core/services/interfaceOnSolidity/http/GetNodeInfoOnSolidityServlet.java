@@ -21,6 +21,7 @@ public class GetNodeInfoOnSolidityServlet extends HttpServlet {
   private NodeInfoOnSolidityService nodeInfoService;
 
   protected void doGet(HttpServletRequest request, HttpServletResponse response) {
+    logger.info("GetNodeInfoOnSolidityServlet get begin {}", request);
     try {
       NodeInfo nodeInfo = nodeInfoService.getNodeInfo();
       response.getWriter().println(JSON.toJSONString(nodeInfo));

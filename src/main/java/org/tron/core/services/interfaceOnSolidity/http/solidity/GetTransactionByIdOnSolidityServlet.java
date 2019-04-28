@@ -17,6 +17,7 @@ public class GetTransactionByIdOnSolidityServlet
   private WalletOnSolidity walletOnSolidity;
 
   protected void doGet(HttpServletRequest request, HttpServletResponse response) {
+    logger.info("GetTransactionByIdOnSolidityServlet get begin {}", request);
     walletOnSolidity.futureGet(() -> super.doGet(request, response));
   }
 

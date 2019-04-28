@@ -22,6 +22,7 @@ public class GetTransactionByIdServlet extends HttpServlet {
   private Wallet wallet;
 
   protected void doGet(HttpServletRequest request, HttpServletResponse response) {
+    logger.info("GetTransactionByIdServlet begin {}", request);
     try {
       String input = request.getParameter("value");
       Transaction reply = wallet
