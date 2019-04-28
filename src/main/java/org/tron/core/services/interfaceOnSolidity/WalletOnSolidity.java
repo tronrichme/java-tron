@@ -86,12 +86,14 @@ public class WalletOnSolidity {
       }
     });
 
+    long start = Time.getCurrentMillis();
     try {
       future.get(1000, TimeUnit.MILLISECONDS);
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
     } catch (ExecutionException ignored) {
     } catch (TimeoutException e) {
+      logger.info("futureGet duration is {}", Time.getCurrentMillis() - start);
       logger.info("futureGet time out");
     }
   }
