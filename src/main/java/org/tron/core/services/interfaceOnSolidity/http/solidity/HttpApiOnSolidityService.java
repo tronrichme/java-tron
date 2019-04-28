@@ -1,6 +1,8 @@
 package org.tron.core.services.interfaceOnSolidity.http.solidity;
 
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.jetty.server.AbstractConnector;
+import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -88,6 +90,9 @@ public class HttpApiOnSolidityService implements Service {
       context.setContextPath("/");
       server.setHandler(context);
       context.getSessionHandler().setMaxInactiveInterval(1);
+      for (Connector connector : server.getConnectors()) {
+        ((AbstractConnector) connector).setIdleTimeout(200);
+      }
       // same as FullNode
       context.addServlet(new ServletHolder(accountOnSolidityServlet), "/walletsolidity/getaccount");
       context.addServlet(new ServletHolder(listWitnessesOnSolidityServlet),
