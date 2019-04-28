@@ -24,12 +24,15 @@ public class GetNowBlockServlet extends HttpServlet {
     try {
       Block reply = wallet.getNowBlock();
       if (reply != null) {
-        response.getWriter().println(Util.printBlock(reply));
+        long time1 = System.currentTimeMillis();
+        String s= Util.printBlock(reply);
+        long time2 = System.currentTimeMillis();
+        response.getWriter().println(s);
+        logger.info("GetNowBlockServlet duration: getNowBlock={}, printBlock={}, response={}",time1 - start, time2 - time1, Time.getCurrentMillis() - time2);
       } else {
         response.getWriter().println("{}");
       }
 
-      logger.info("GetNowBlockServlet duration: {}", Time.getCurrentMillis() - start);
     } catch (Exception e) {
       logger.debug("Exception: {}", e.getMessage());
       try {
