@@ -132,7 +132,7 @@ public class HttpApiOnSolidityService implements Service {
       context.addServlet(new ServletHolder(getNodeInfoOnSolidityServlet), "/wallet/getnodeinfo");
 
       server.start();
-      context.getSessionHandler().setMaxInactiveInterval(2);
+//      context.getSessionHandler().setMaxInactiveInterval(2);
     } catch (Exception e) {
       logger.debug("IOException: {}", e.getMessage());
     }
