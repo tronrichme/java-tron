@@ -28,8 +28,8 @@ public class GetNowBlockServlet extends HttpServlet {
         String s= Util.printBlock(reply);
         long time2 = System.currentTimeMillis();
         response.getWriter().println(s);
-        logger.info("GetNowBlockServlet duration: getNowBlock={}, printBlock={}, response={}, size:{}, address:{}, {}",
-            time1 - start, time2 - time1, Time.getCurrentMillis() - time2, s.length(), request.getRemoteAddr(), request.getSession().getMaxInactiveInterval());
+        logger.info("GetNowBlockServlet duration: getNowBlock={}, printBlock={}, response={}, size:{}, address:{}",
+            time1 - start, time2 - time1, Time.getCurrentMillis() - time2, s.length(), request.getRemoteAddr());
       } else {
         response.getWriter().println("{}");
       }
