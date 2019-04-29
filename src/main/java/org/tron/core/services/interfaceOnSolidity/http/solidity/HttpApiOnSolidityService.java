@@ -89,9 +89,9 @@ public class HttpApiOnSolidityService implements Service {
       ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
       context.setContextPath("/");
       server.setHandler(context);
-//      for (Connector connector : server.getConnectors()) {
-//        ((AbstractConnector) connector).setIdleTimeout(1000);
-//      }
+      for (Connector connector : server.getConnectors()) {
+        ((AbstractConnector) connector).setIdleTimeout(1000);
+      }
       // same as FullNode
       context.addServlet(new ServletHolder(accountOnSolidityServlet), "/walletsolidity/getaccount");
       context.addServlet(new ServletHolder(listWitnessesOnSolidityServlet),
