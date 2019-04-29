@@ -89,7 +89,6 @@ public class HttpApiOnSolidityService implements Service {
       ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
       context.setContextPath("/");
       server.setHandler(context);
-      context.getSessionHandler().setMaxInactiveInterval(1);
       for (Connector connector : server.getConnectors()) {
         ((AbstractConnector) connector).setIdleTimeout(200);
       }
@@ -133,6 +132,7 @@ public class HttpApiOnSolidityService implements Service {
       context.addServlet(new ServletHolder(getNodeInfoOnSolidityServlet), "/wallet/getnodeinfo");
 
       server.start();
+      context.getSessionHandler().setMaxInactiveInterval(1);
     } catch (Exception e) {
       logger.debug("IOException: {}", e.getMessage());
     }
