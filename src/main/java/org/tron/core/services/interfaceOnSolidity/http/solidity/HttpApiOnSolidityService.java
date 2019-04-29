@@ -90,7 +90,7 @@ public class HttpApiOnSolidityService implements Service {
       context.setContextPath("/");
       server.setHandler(context);
       for (Connector connector : server.getConnectors()) {
-        ((AbstractConnector) connector).setIdleTimeout(500);
+        ((AbstractConnector) connector).setIdleTimeout(1000);
       }
       // same as FullNode
       context.addServlet(new ServletHolder(accountOnSolidityServlet), "/walletsolidity/getaccount");
